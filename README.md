@@ -19,7 +19,9 @@ MyDoodler is an Android application that allows users to draw on a canvas with v
 3. Build and run the app on an emulator or Android device.
 
 ## References
-- [Android Developer Documentation](https://developer.android.com/docs)
+- [Dragos Holban
+
+Web & Mobile Development Tutorials](https://dragosholban.com/2018/04/21/how-to-build-a-drawing-android-app/)
 - [Online tutorials and resources]
 
 ## Demo Video
