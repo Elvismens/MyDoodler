@@ -13,7 +13,7 @@ MyDoodler is an Android application that allows users to draw on a canvas with v
 ## How to Run
 1. Clone this repository:
     ```bash
-    git clone https://github.com/yourusername/MyDoodler.git
+    git clone https://github.com/Elvismens/MyDoodler.git
     ```
 2. Open the project in Android Studio.
 3. Build and run the app on an emulator or Android device.
