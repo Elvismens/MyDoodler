@@ -122,6 +122,38 @@
         android:progress="255"
         app:layout_constraintBottom_toBottomOf="parent" />
 
+    <LinearLayout
+        android:id="@+id/buttonLayout"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        android:layout_marginEnd="8dp"
+        android:layout_marginTop="8dp">
+
+        <ImageButton
+            android:id="@+id/undoButton"
+            android:layout_width="70dp"
+            android:layout_height="70dp"
+            android:src="@android:drawable/ic_menu_revert"
+            android:contentDescription="@string/undo" />
+
+        <ImageButton
+            android:id="@+id/redoButton"
+            android:layout_width="70dp"
+            android:layout_height="70dp"
+            android:src="@android:drawable/ic_menu_rotate"
+            android:contentDescription="@string/redo" />
+
+        <ImageButton
+            android:id="@+id/shareButton"
+            android:layout_width="70dp"
+            android:layout_height="70dp"
+            android:src="@android:drawable/ic_menu_share"
+            android:contentDescription="@string/share" />
+    </LinearLayout>
+
     <Button
         android:id="@+id/button"
         android:layout_width="0dp"

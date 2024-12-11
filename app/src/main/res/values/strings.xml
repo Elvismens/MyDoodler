@@ -1,3 +1,7 @@
 <resources>
     <string name="app_name">MyDoodler</string>
+    <!-- Add these new lines -->
+    <string name="undo">Undo</string>
+    <string name="redo">Redo</string>
+    <string name="share">Share</string>
 </resources>

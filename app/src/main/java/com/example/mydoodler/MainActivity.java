@@ -1,12 +1,24 @@
 package com.example.mydoodler;
 
 import android.content.DialogInterface;
+import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.Canvas;
 import android.graphics.drawable.ColorDrawable;
+import android.net.Uri;
 import android.os.Bundle;
+import android.provider.MediaStore;
 import android.view.View;
 import android.widget.SeekBar;
+import android.widget.Toast;
+
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.content.FileProvider;
+
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -21,6 +33,27 @@ public class MainActivity extends AppCompatActivity {
 
         drawingView = findViewById(R.id.canvas);
         drawingView.setOnTouchListener(new TouchListener());
+
+        findViewById(R.id.undoButton).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                drawingView.undo();
+            }
+        });
+
+        findViewById(R.id.redoButton).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                drawingView.redo();
+            }
+        });
+
+        findViewById(R.id.shareButton).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                shareDrawing();
+            }
+        });
 
         seekBar = findViewById(R.id.seekBar);
         seekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
@@ -85,5 +118,29 @@ public class MainActivity extends AppCompatActivity {
                 });
         AlertDialog dialog = builder.create();
         dialog.show();
+    }
+
+    private void shareDrawing() {
+        Bitmap bitmap = Bitmap.createBitmap(drawingView.getWidth(), drawingView.getHeight(), Bitmap.Config.ARGB_8888);
+        Canvas canvas = new Canvas(bitmap);
+        drawingView.draw(canvas);
+
+        try {
+            File file = new File(getExternalCacheDir(), "drawing.png");
+            FileOutputStream outputStream = new FileOutputStream(file);
+            bitmap.compress(Bitmap.CompressFormat.PNG, 100, outputStream);
+            outputStream.flush();
+            outputStream.close();
+            Uri uri = FileProvider.getUriForFile(this, getApplicationContext().getPackageName() + ".provider", file);
+
+            Intent intent = new Intent(Intent.ACTION_SEND);
+            intent.putExtra(Intent.EXTRA_STREAM, uri);
+            intent.setType("image/png");
+            intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION); // Ensure permission to read the file
+            startActivity(Intent.createChooser(intent, "Share Drawing"));
+        } catch (IOException e) {
+            e.printStackTrace();
+            Toast.makeText(this, "Failed to share drawing", Toast.LENGTH_SHORT).show();
+        }
     }
 }

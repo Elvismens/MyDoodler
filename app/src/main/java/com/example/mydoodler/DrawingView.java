@@ -5,88 +5,111 @@ import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.graphics.Path;
 import android.util.AttributeSet;
+import android.view.MotionEvent;
 import android.view.View;
 
-import androidx.annotation.Nullable;
-import androidx.annotation.RequiresApi;
-import android.os.Build;
-
 import java.util.ArrayList;
+import java.util.List;
 
 public class DrawingView extends View {
 
-    private ArrayList<Path> paths = new ArrayList<>();
-    private ArrayList<Integer> colors = new ArrayList<>();
-    private ArrayList<Integer> widths = new ArrayList<>();
-    private ArrayList<Integer> opacities = new ArrayList<>();
-    private int currentColor = 0xFF000000;
-    private int currentWidth = 6;
-    private int currentOpacity = 255;
+    private class PathWithPaint {
+        Path path;
+        Paint paint;
 
-    public DrawingView(Context context) {
-        super(context);
-    }
-
-    public DrawingView(Context context, @Nullable AttributeSet attrs) {
-        super(context, attrs);
-    }
-
-    public DrawingView(Context context, @Nullable AttributeSet attrs, int defStyleAttr) {
-        super(context, attrs, defStyleAttr);
-    }
-
-    @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
-    public DrawingView(Context context, @Nullable AttributeSet attrs, int defStyleAttr, int defStyleRes) {
-        super(context, attrs, defStyleAttr, defStyleRes);
-    }
-
-    public void addPath(Path path) {
-        paths.add(path);
-        colors.add(currentColor);
-        widths.add(currentWidth);
-        opacities.add(currentOpacity);
-    }
-
-    public Path getLastPath() {
-        if (paths.size() > 0) {
-            return paths.get(paths.size() - 1);
+        PathWithPaint(Path path, Paint paint) {
+            this.path = path;
+            this.paint = paint;
         }
-        return null;
+    }
+
+    private List<PathWithPaint> paths = new ArrayList<>();
+    private List<PathWithPaint> undonePaths = new ArrayList<>();
+    private Paint currentPaint;
+    private Path currentPath;
+
+    public DrawingView(Context context, AttributeSet attrs) {
+        super(context, attrs);
+        currentPaint = new Paint();
+        currentPaint.setAntiAlias(true);
+        currentPaint.setDither(true);
+        currentPaint.setColor(0xFF000000); // default color
+        currentPaint.setStyle(Paint.Style.STROKE);
+        currentPaint.setStrokeJoin(Paint.Join.ROUND);
+        currentPaint.setStrokeCap(Paint.Cap.ROUND);
+        currentPaint.setStrokeWidth(10); // default width
     }
 
     @Override
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
-
-        int i = 0;
-        for (Path path : paths) {
-            Paint paint = new Paint();
-            paint.setColor(colors.get(i));
-            paint.setStyle(Paint.Style.STROKE);
-            paint.setStrokeWidth(widths.get(i));
-            paint.setAlpha(opacities.get(i));
-            canvas.drawPath(path, paint);
-            i++;
+        for (PathWithPaint pwp : paths) {
+            canvas.drawPath(pwp.path, pwp.paint);
+        }
+        if (currentPath != null) {
+            canvas.drawPath(currentPath, currentPaint);
         }
     }
 
-    public void setCurrentColor(int color) {
-        currentColor = color;
+    @Override
+    public boolean onTouchEvent(MotionEvent event) {
+        switch (event.getAction()) {
+            case MotionEvent.ACTION_DOWN:
+                currentPath = new Path();
+                currentPath.moveTo(event.getX(), event.getY());
+                invalidate();
+                break;
+            case MotionEvent.ACTION_MOVE:
+                if (currentPath != null) {
+                    currentPath.lineTo(event.getX(), event.getY());
+                }
+                invalidate();
+                break;
+            case MotionEvent.ACTION_UP:
+                if (currentPath != null) {
+                    paths.add(new PathWithPaint(currentPath, new Paint(currentPaint)));
+                    currentPath = null;
+                }
+                invalidate();
+                break;
+        }
+        return true;
     }
 
-    public void setCurrentWidth(int width) {
-        currentWidth = (width + 1) * 2;
+    public void undo() {
+        if (paths.size() > 0) {
+            undonePaths.add(paths.remove(paths.size() - 1));
+            invalidate();
+        }
     }
 
-    public void setCurrentOpacity(int opacity) {
-        currentOpacity = opacity;
+    public void redo() {
+        if (undonePaths.size() > 0) {
+            paths.add(undonePaths.remove(undonePaths.size() - 1));
+            invalidate();
+        }
     }
 
     public void erase() {
         paths.clear();
-        colors.clear();
-        widths.clear();
-        opacities.clear();
+        undonePaths.clear();
         invalidate();
+    }
+
+    public void addPath(Path path) {
+        paths.add(new PathWithPaint(path, new Paint(currentPaint)));
+        undonePaths.clear(); // Clear the undone paths when a new path is added
+    }
+
+    public void setCurrentWidth(float width) {
+        currentPaint.setStrokeWidth(width);
+    }
+
+    public void setCurrentOpacity(int opacity) {
+        currentPaint.setAlpha(opacity);
+    }
+
+    public void setCurrentColor(int color) {
+        currentPaint.setColor(color);
     }
 }

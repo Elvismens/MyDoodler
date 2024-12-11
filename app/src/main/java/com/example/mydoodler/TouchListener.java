@@ -6,24 +6,27 @@ import android.graphics.Path;
 
 public class TouchListener implements View.OnTouchListener {
 
+    private Path currentPath;
+
     @Override
     public boolean onTouch(View view, MotionEvent event) {
         float x = event.getX();
         float y = event.getY();
         DrawingView drawingView = (DrawingView) view;
-        Path path;
 
         switch (event.getAction() & MotionEvent.ACTION_MASK) {
             case MotionEvent.ACTION_DOWN:
-                path = new Path();
-                path.moveTo(x, y);
-                drawingView.addPath(path);
+                currentPath = new Path();
+                currentPath.moveTo(x, y);
+                drawingView.addPath(currentPath);
                 break;
             case MotionEvent.ACTION_MOVE:
-                path = drawingView.getLastPath();
-                if (path != null) {
-                    path.lineTo(x, y);
+                if (currentPath != null) {
+                    currentPath.lineTo(x, y);
                 }
+                break;
+            case MotionEvent.ACTION_UP:
+                currentPath = null;
                 break;
         }
 
@@ -32,4 +35,3 @@ public class TouchListener implements View.OnTouchListener {
         return true;
     }
 }
-
